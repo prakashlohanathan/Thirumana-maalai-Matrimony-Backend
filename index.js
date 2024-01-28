@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { dbConnection } from "./Database/dbConfig.js";
-import { authRouter } from "./Controller/Auth.js";
+import { authRouter } from "./Controller/auth.js";
 import { userRouter } from "./Controller/User.js";
 import { invitationRouter } from "./Controller/invitations.js";
 import { interestRouter } from "./Controller/interests.js";
