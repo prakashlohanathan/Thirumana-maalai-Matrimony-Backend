@@ -17,11 +17,11 @@ const decodeJwtToken = (token)=>{
     }
 }
 
-//SignUp
+//SignUp(node)
 router.post('/signup', async(req,res)=>{
     try {
 
-        //Find User is (already) registered
+        //Find User is already registered
         let user = await User.findOne({email: req.body.email});
         if(user) return res.status(400).json({message:"Email already registered"});
 
