@@ -2,9 +2,26 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import { User, generateJwtToken } from '../Models/User.js';
 import jwt from 'jsonwebtoken'
+import { MailSender } from '../mailer.js';
 
 
 let router = express.Router();
+
+//Get Current Date
+function getCurrentDate(){
+    // Get current date
+    let currentDate = new Date();
+    // Get day, month, and year from the current date
+    let day = currentDate.getDate();
+    let month = currentDate.getMonth() + 1; // Note: January is 0!
+    let year = currentDate.getFullYear();
+    // Pad day and month with leading zeros if needed
+    day = day < 10 ? "0" + day : day;
+    month = month < 10 ? "0" + month : month;
+    // Format the date as dd/mm/yyyy
+    let date = day + "/" + month + "/" + year;
+    return date;
+}
 
 //Decode Jwt Token
 const decodeJwtToken = (token)=>{
@@ -93,6 +110,41 @@ router.put('/reset-password', async(req,res)=>{
         //generate jwtToken
         let token=generateJwtToken(user._id)
         res.status(200).json({message:"Password Reseted Successfully", token})
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message:"Internal Server Error"})
+    }
+})
+
+//Set OTP password
+router.put('/set-otp', async(req,res)=>{
+    try {
+        //Find User is available
+        let email=req.body.email
+        let user = await User.findOne({email: email});
+        if(!user) return res.status(400).json({message:"Invalid Credentials"});
+        let msg = String(Math.floor(Math.random() * (9999 - 1000)));
+        let date=getCurrentDate();
+        let otp = {
+            value:msg,
+            date:date
+        }
+
+        let updateOtp=await User.findOneAndUpdate(
+            {email:email},
+            {$set:{otp:otp}},
+            
+        )
+        //console.log(updateOtp)
+        let mailData={
+            email:email,
+            subject:"New message from Thirumana maalai Matrimony",
+            message:`User one Time Password is  ${msg}, It is valid for 24 hour only`
+        } 
+       //Sending mail
+       let mail=await MailSender({data:mailData});
+        //console.log(mail)
+        res.status(200).json({message:"OTP Send Successfully", otp})
     } catch (error) {
         console.log(error);
         res.status(500).json({message:"Internal Server Error"})

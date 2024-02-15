@@ -78,7 +78,11 @@ let userSchema = new mongoose.Schema(
         image:{
             type:String,
             default:""
-        }
+        },
+        otp:{
+            type:Object,
+            default:{}
+        },
     }
 )
 
